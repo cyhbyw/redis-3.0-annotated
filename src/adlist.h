@@ -109,13 +109,13 @@ typedef struct list {
 
 // 将链表 l 的值复制函数设置为 m
 // T = O(1)
-#define listSetDupMethod(l,m) ((l)->dup = (m))
+#define listSetDupMethod(l, m) ((l)->dup = (m))
 // 将链表 l 的值释放函数设置为 m
 // T = O(1)
-#define listSetFreeMethod(l,m) ((l)->free = (m))
+#define listSetFreeMethod(l, m) ((l)->free = (m))
 // 将链表的对比函数设置为 m
 // T = O(1)
-#define listSetMatchMethod(l,m) ((l)->match = (m))
+#define listSetMatchMethod(l, m) ((l)->match = (m))
 
 // 返回给定链表的值复制函数
 // T = O(1)
@@ -129,25 +129,36 @@ typedef struct list {
 
 /* Prototypes */
 list *listCreate(void);
+
 void listRelease(list *list);
+
 list *listAddNodeHead(list *list, void *value);
+
 list *listAddNodeTail(list *list, void *value);
+
 list *listInsertNode(list *list, listNode *old_node, void *value, int after);
+
 void listDelNode(list *list, listNode *node);
+
 listIter *listGetIterator(list *list, int direction);
+
 listNode *listNext(listIter *iter);
+
 void listReleaseIterator(listIter *iter);
+
 list *listDup(list *orig);
+
 listNode *listSearchKey(list *list, void *key);
+
 listNode *listIndex(list *list, long index);
+
 void listRewind(list *list, listIter *li);
+
 void listRewindTail(list *list, listIter *li);
+
 void listRotate(list *list);
 
-/* Directions for iterators 
- *
- * 迭代器进行迭代的方向
- */
+/* Directions for iterators 迭代器进行迭代的方向 */
 // 从表头向表尾进行迭代
 #define AL_START_HEAD 0
 // 从表尾到表头进行迭代
