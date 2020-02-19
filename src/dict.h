@@ -59,14 +59,14 @@
 #define DICT_NOTUSED(V) ((void) V)
 
 /*
- * 哈希表节点
+ * 哈希表节点，保存一个键值对
  */
 typedef struct dictEntry {
-    
+
     // 键
     void *key;
 
-    // 值
+    // 值，可以是一个指针、或者是一个uint64_t整数、或者是一个int64_t整数
     union {
         void *val;
         uint64_t u64;
@@ -74,6 +74,7 @@ typedef struct dictEntry {
     } v;
 
     // 指向下个哈希表节点，形成链表
+    // 将多个哈希值相同的键值对连接在一起，以此来解决键冲突问题
     struct dictEntry *next;
 
 } dictEntry;
@@ -81,6 +82,7 @@ typedef struct dictEntry {
 
 /*
  * 字典类型特定函数
+ * 保存了一组用于特定类型键值对的函数，Redis会为用途不同的字典设置不同的类型特定函数
  */
 typedef struct dictType {
 
@@ -98,7 +100,7 @@ typedef struct dictType {
 
     // 销毁键的函数
     void (*keyDestructor)(void *privdata, void *key);
-    
+
     // 销毁值的函数
     void (*valDestructor)(void *privdata, void *obj);
 
@@ -113,18 +115,18 @@ typedef struct dictType {
  * 每个字典都使用两个哈希表，从而实现渐进式 rehash 。
  */
 typedef struct dictht {
-    
+
     // 哈希表数组
     dictEntry **table;
 
-    // 哈希表大小
+    // 哈希表大小（既是table数组的大小）
     unsigned long size;
-    
+
     // 哈希表大小掩码，用于计算索引值
     // 总是等于 size - 1
     unsigned long sizemask;
 
-    // 该哈希表已有节点的数量
+    // 该哈希表已有节点（键值对）的数量
     unsigned long used;
 
 } dictht;
@@ -134,10 +136,10 @@ typedef struct dictht {
  */
 typedef struct dict {
 
-    // 类型特定函数
+    // 类型特定函数，是一个指向dictType结构的指针
     dictType *type;
 
-    // 私有数据
+    // 私有数据，保存了需要传给那些类型特定函数的可选参数
     void *privdata;
 
     // 哈希表
@@ -166,7 +168,7 @@ typedef struct dict {
  * 而不对字典进行修改。
  */
 typedef struct dictIterator {
-        
+
     // 被迭代的字典
     dict *d;
 
@@ -253,33 +255,61 @@ typedef void (dictScanFunction)(void *privdata, const dictEntry *de);
 
 /* API */
 dict *dictCreate(dictType *type, void *privDataPtr);
+
 int dictExpand(dict *d, unsigned long size);
+
 int dictAdd(dict *d, void *key, void *val);
+
 dictEntry *dictAddRaw(dict *d, void *key);
+
 int dictReplace(dict *d, void *key, void *val);
+
 dictEntry *dictReplaceRaw(dict *d, void *key);
+
 int dictDelete(dict *d, const void *key);
+
 int dictDeleteNoFree(dict *d, const void *key);
+
 void dictRelease(dict *d);
-dictEntry * dictFind(dict *d, const void *key);
+
+dictEntry *dictFind(dict *d, const void *key);
+
 void *dictFetchValue(dict *d, const void *key);
+
 int dictResize(dict *d);
+
 dictIterator *dictGetIterator(dict *d);
+
 dictIterator *dictGetSafeIterator(dict *d);
+
 dictEntry *dictNext(dictIterator *iter);
+
 void dictReleaseIterator(dictIterator *iter);
+
 dictEntry *dictGetRandomKey(dict *d);
+
 int dictGetRandomKeys(dict *d, dictEntry **des, int count);
+
 void dictPrintStats(dict *d);
+
 unsigned int dictGenHashFunction(const void *key, int len);
+
 unsigned int dictGenCaseHashFunction(const unsigned char *buf, int len);
-void dictEmpty(dict *d, void(callback)(void*));
+
+void dictEmpty(dict *d, void(callback)(void *));
+
 void dictEnableResize(void);
+
 void dictDisableResize(void);
+
 int dictRehash(dict *d, int n);
+
 int dictRehashMilliseconds(dict *d, int ms);
+
 void dictSetHashFunctionSeed(unsigned int initval);
+
 unsigned int dictGetHashFunctionSeed(void);
+
 unsigned long dictScan(dict *d, unsigned long v, dictScanFunction *fn, void *privdata);
 
 /* Hash table types */
