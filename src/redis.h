@@ -730,7 +730,8 @@ typedef struct zskiplistNode {
         // 前进指针
         struct zskiplistNode *forward;
 
-        // 跨度
+        // 跨度，用于记录两个节点之间的距离，跨度越大距离越大
+        // 跨度是用于计算排位的：在查找某个节点的过程中，将沿途访问过的所有层的跨度累计起来，就是目标结果在跳表中的排位
         unsigned int span;
 
     } level[];
