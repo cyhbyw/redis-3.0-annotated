@@ -30,28 +30,38 @@
 
 #ifndef __INTSET_H
 #define __INTSET_H
+
 #include <stdint.h>
 
 typedef struct intset {
-    
+
     // 编码方式
     uint32_t encoding;
 
     // 集合包含的元素数量
     uint32_t length;
 
-    // 保存元素的数组
+    // 保存元素的数组，从小到大排列且不允许重复
+    // 虽然声明为int8_t但是实际上并不保存int8_t类型的值，而是取决于encoding属性的值
+    // 实际可保存 int16_t, int32_t, int64_t
     int8_t contents[];
 
 } intset;
 
 intset *intsetNew(void);
+
 intset *intsetAdd(intset *is, int64_t value, uint8_t *success);
+
 intset *intsetRemove(intset *is, int64_t value, int *success);
+
 uint8_t intsetFind(intset *is, int64_t value);
+
 int64_t intsetRandom(intset *is);
+
 uint8_t intsetGet(intset *is, uint32_t pos, int64_t *value);
+
 uint32_t intsetLen(intset *is);
+
 size_t intsetBlobLen(intset *is);
 
 #endif // __INTSET_H
