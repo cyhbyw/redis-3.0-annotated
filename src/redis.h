@@ -401,6 +401,7 @@ typedef long long mstime_t; /* millisecond time type. */
 typedef struct redisObject {
 
     // 类型
+    // 可以是 REDIS_STRING, REDIS_LIST, REDIS_HASH, REDIS_SET, REDIS_ZSET 中的一个
     unsigned type:4;
 
     // 编码
@@ -412,7 +413,7 @@ typedef struct redisObject {
     // 引用计数
     int refcount;
 
-    // 指向实际值的指针
+    // 指向对象的底层实现数据结构，这些数据结构由encoding属性决定
     void *ptr;
 
 } robj;
