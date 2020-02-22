@@ -456,7 +456,9 @@ typedef struct redisDb {
     // 数据库键空间，保存着数据库中的所有键值对
     dict *dict;                 /* The keyspace for this DB */
 
-    // 键的过期时间，字典的键为键，字典的值为过期事件 UNIX 时间戳
+    // 键的过期时间，这个字典叫做过期字典
+    // 字典的键为键，是一个指针，指向键空间中的某个键对象
+    // 字典的值为过期时间，是一个long long类型的整数，毫秒精度的 UNIX 时间戳
     dict *expires;              /* Timeout of keys with a timeout set */
 
     // 正处于阻塞状态的键
@@ -837,7 +839,7 @@ struct redisServer {
     // serverCron() 每秒调用的次数
     int hz;                     /* serverCron() calls frequency in hertz */
 
-    // 数据库
+    // 数据库：一个数组，保存着服务器中的所有数据库
     redisDb *db;
 
     // 命令表（受到 rename 配置选项的作用）

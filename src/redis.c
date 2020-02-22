@@ -809,44 +809,27 @@ int activeExpireCycleTryExpire(redisDb *db, dictEntry *de, long long now) {
     }
 }
 
-/* Try to expire a few timed out keys. The algorithm used is adaptive and
- * will use few CPU cycles if there are few expiring keys, otherwise
- * it will get more aggressive to avoid that too much memory is used by
- * keys that can be removed from the keyspace.
+/*
+ * Redis过期键的定期删除策略
+ * 它在规定时间内，分多次遍历服务器中的各个数据库，从数据库的expires字典中随机检查一部分键的过期时间，并删除其中过期的键
+ *
  *
  * 函数尝试删除数据库中已经过期的键。
  * 当带有过期时间的键比较少时，函数运行得比较保守，
  * 如果带有过期时间的键比较多，那么函数会以更积极的方式来删除过期键，
  * 从而可能地释放被过期键占用的内存。
  *
- * No more than REDIS_DBCRON_DBS_PER_CALL databases are tested at every
- * iteration.
- *
  * 每次循环中被测试的数据库数目不会超过 REDIS_DBCRON_DBS_PER_CALL 。
- *
- * This kind of call is used when Redis detects that timelimit_exit is
- * true, so there is more work to do, and we do it more incrementally from
- * the beforeSleep() function of the event loop.
  *
  * 如果 timelimit_exit 为真，那么说明还有更多删除工作要做，
  * 那么在 beforeSleep() 函数调用时，程序会再次执行这个函数。
  *
- * Expire cycle type:
- *
  * 过期循环的类型：
- *
- * If type is ACTIVE_EXPIRE_CYCLE_FAST the function will try to run a
- * "fast" expire cycle that takes no longer than EXPIRE_FAST_CYCLE_DURATION
- * microseconds, and is not repeated again before the same amount of time.
  *
  * 如果循环的类型为 ACTIVE_EXPIRE_CYCLE_FAST ，
  * 那么函数会以“快速过期”模式执行，
  * 执行的时间不会长过 EXPIRE_FAST_CYCLE_DURATION 毫秒，
  * 并且在 EXPIRE_FAST_CYCLE_DURATION 毫秒之内不会再重新执行。
- *
- * If type is ACTIVE_EXPIRE_CYCLE_SLOW, that normal expire cycle is
- * executed, where the time limit is a percentage of the REDIS_HZ period
- * as specified by the REDIS_EXPIRELOOKUPS_TIME_PERC define. 
  *
  * 如果循环的类型为 ACTIVE_EXPIRE_CYCLE_SLOW ，
  * 那么函数会以“正常过期”模式执行，
