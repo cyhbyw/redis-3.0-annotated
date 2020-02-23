@@ -577,16 +577,16 @@ typedef struct redisClient {
     // 客户端的名字
     robj *name;             /* As set by CLIENT SETNAME */
 
-    // 查询缓冲区
+    // 查询缓冲区，用于保存客户端发送的命令请求
     sds querybuf;
 
     // 查询缓冲区长度峰值
     size_t querybuf_peak;   /* Recent (100ms or more) peak of querybuf size */
 
-    // 参数数量
+    // 参数数量，记录argv数组的长度
     int argc;
 
-    // 参数对象数组
+    // 参数对象数组，都是字符串对象，其中argv[0]是要执行的命令，之后的其他项则是传给命令的参数
     robj **argv;
 
     // 记录被客户端执行的命令
@@ -620,7 +620,7 @@ typedef struct redisClient {
     // 客户端的输出缓冲区超过软性限制的时间
     time_t obuf_soft_limit_reached_time;
 
-    // 客户端状态标志
+    // 客户端状态标志：记录了客户端的角色以及客户端目前所处的状态
     int flags;              /* REDIS_SLAVE | REDIS_MONITOR | REDIS_MULTI ... */
 
     // 当 server.requirepass 不为 NULL 时
@@ -678,7 +678,7 @@ typedef struct redisClient {
     sds peerid;             /* Cached peer ID. */
 
     /* Response buffer */
-    // 回复偏移量
+    // 回复偏移量，记录 buf[] 数组目前已使用的字节数量
     int bufpos;
     // 回复缓冲区
     char buf[REDIS_REPLY_CHUNK_BYTES];
