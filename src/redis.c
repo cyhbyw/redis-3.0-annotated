@@ -1260,43 +1260,26 @@ void updateCachedTime(void) {
     server.mstime = mstime();
 }
 
-/* This is our timer interrupt, called server.hz times per second.
- *
- * 这是 Redis 的时间中断器，每秒调用 server.hz 次。
- *
- * Here is where we do a number of things that need to be done asynchronously.
- * For instance:
+/*
+ * 这是 Redis 的时间中断器，每秒调用 server.hz 次。默认每100毫秒执行一次
  *
  * 以下是需要异步执行的操作：
  *
- * - Active expired keys collection (it is also performed in a lazy way on
- *   lookup).
- *   主动清除过期键。
+ * - 主动清除过期键。
  *
- * - Software watchdog.
- *   更新软件 watchdog 的信息。
+ * - 更新软件 watchdog 的信息。
  *
- * - Update some statistic.
- *   更新统计信息。
+ * - 更新统计信息。
  *
- * - Incremental rehashing of the DBs hash tables.
- *   对数据库进行渐增式 Rehash
+ * - 对数据库进行渐增式 Rehash
  *
- * - Triggering BGSAVE / AOF rewrite, and handling of terminated children.
- *   触发 BGSAVE 或者 AOF 重写，并处理之后由 BGSAVE 和 AOF 重写引发的子进程停止。
+ * - 触发 BGSAVE 或者 AOF 重写，并处理之后由 BGSAVE 和 AOF 重写引发的子进程停止。
  *
- * - Clients timeout of different kinds.
- *   处理客户端超时。
+ * - 处理客户端超时。
  *
- * - Replication reconnection.
- *   复制重连
+ * - 复制重连
  *
- * - Many more...
- *   等等。。。
- *
- * Everything directly called here will be called server.hz times per second,
- * so in order to throttle execution of things we want to do less frequently
- * a macro is used: run_with_period(milliseconds) { .... }
+ * - 等等。。。
  *
  * 因为 serverCron 函数中的所有代码都会每秒调用 server.hz 次，
  * 为了对部分代码的调用次数进行限制，

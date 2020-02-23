@@ -1091,7 +1091,7 @@ struct redisServer {
     int aof_last_write_errno;       /* Valid if aof_last_write_status is ERR */
     /* RDB persistence */
 
-    // 自从上次 SAVE 执行以来，数据库被修改的次数
+    // 自从上次 SAVE/BGSAVE 执行以来，所有数据库被修改的次数（包括写入、删除、更新等操作）
     long long dirty;                /* Changes to DB from the last save */
 
     // BGSAVE 执行前的数据库被修改次数
@@ -1100,13 +1100,14 @@ struct redisServer {
     // 负责执行 BGSAVE 的子进程的 ID
     // 没在执行 BGSAVE 时，设为 -1
     pid_t rdb_child_pid;            /* PID of RDB saving child */
+    // RDB save 条件的数组，默认是：save 900 1, save 300 10, save 60 10000
     struct saveparam *saveparams;   /* Save points array for RDB */
     int saveparamslen;              /* Number of saving points */
     char *rdb_filename;             /* Name of RDB file */
     int rdb_compression;            /* Use compression in RDB? */
     int rdb_checksum;               /* Use RDB checksum? */
 
-    // 最后一次完成 SAVE 的时间
+    // 最后一次完成 SAVE/BGSAVE 的时间
     time_t lastsave;                /* Unix time of last successful save */
 
     // 最后一次尝试执行 BGSAVE 的时间
