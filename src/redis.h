@@ -1349,7 +1349,7 @@ struct redisCommand {
     // 命令名字
     char *name;
 
-    // 实现函数
+    // 函数指针，指向命令的实现函数
     redisCommandProc *proc;
 
     // 参数个数
@@ -1361,8 +1361,6 @@ struct redisCommand {
     // 实际 FLAG
     int flags;    /* The actual flags, obtained from the 'sflags' field. */
 
-    /* Use a function to determine keys arguments in a command line.
-     * Used for Redis Cluster redirect. */
     // 从命令中判断命令的键参数。在 Redis 集群转向时使用。
     redisGetKeysProc *getkeys_proc;
 
