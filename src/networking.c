@@ -789,7 +789,7 @@ static void acceptCommonHandler(int fd, int flags) {
 }
 
 /* 
- * 创建一个 TCP 连接处理器
+ * 创建一个 TCP 连接处理器（连接应答处理器）
  */
 void acceptTcpHandler(aeEventLoop *el, int fd, void *privdata, int mask) {
     int cport, cfd, max = MAX_ACCEPTS_PER_CALL;
@@ -803,8 +803,7 @@ void acceptTcpHandler(aeEventLoop *el, int fd, void *privdata, int mask) {
         cfd = anetTcpAccept(server.neterr, fd, cip, sizeof(cip), &cport);
         if (cfd == ANET_ERR) {
             if (errno != EWOULDBLOCK)
-                redisLog(REDIS_WARNING,
-                    "Accepting client connection: %s", server.neterr);
+                redisLog(REDIS_WARNING, "Accepting client connection: %s", server.neterr);
             return;
         }
         redisLog(REDIS_VERBOSE,"Accepted %s:%d", cip, cport);
@@ -1040,6 +1039,7 @@ void freeClientsInAsyncFreeQueue(void) {
 }
 
 /*
+ * 命令回复处理器，负责将服务器执行命令后得到的结果通过套接字返回给客户端
  * 负责传送命令回复的写处理器
  */
 void sendReplyToClient(aeEventLoop *el, int fd, void *privdata, int mask) {
@@ -1543,6 +1543,7 @@ void processInputBuffer(redisClient *c) {
 }
 
 /*
+ * 命令请求处理器，负责从套接字中读入客户端发送的命令请求内容
  * 读取客户端的查询缓冲区内容
  */
 void readQueryFromClient(aeEventLoop *el, int fd, void *privdata, int mask) {
