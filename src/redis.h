@@ -850,10 +850,10 @@ struct redisServer {
     // 事件状态
     aeEventLoop *el;
 
-    // 最近一次使用时钟
+    // 最近一次使用时钟，用于计算键的空转时长
     unsigned lruclock:REDIS_LRU_BITS; /* Clock for LRU eviction */
 
-    // 关闭服务器的标识
+    // 关闭服务器的标识，1表示关闭服务器，0不做动作
     int shutdown_asap;          /* SHUTDOWN needed ASAP */
 
     // 在执行 serverCron() 时进行渐进式 rehash
@@ -1052,9 +1052,10 @@ struct redisServer {
 
     // AOF 文件的当前字节大小
     off_t aof_current_size;         /* AOF current size. */
+    // 如果值为1表示有 BGREWRITEAOF 命令被延迟了
     int aof_rewrite_scheduled;      /* Rewrite once BGSAVE terminates. */
 
-    // 负责进行 AOF 重写的子进程 ID
+    // 负责执行 BGREWRITEAOF 命令的子进程的ID，当没有在执行时值为-1
     pid_t aof_child_pid;            /* PID if rewriting process */
 
     // AOF 重写缓存链表，链接着多个缓存块
@@ -1097,8 +1098,7 @@ struct redisServer {
     // BGSAVE 执行前的数据库被修改次数
     long long dirty_before_bgsave;  /* Used to restore dirty on failed BGSAVE */
 
-    // 负责执行 BGSAVE 的子进程的 ID
-    // 没在执行 BGSAVE 时，设为 -1
+    // 负责执行 BGSAVE 的子进程的 ID，没在执行 BGSAVE 时，设为 -1
     pid_t rdb_child_pid;            /* PID of RDB saving child */
     // RDB save 条件的数组，默认是：save 900 1, save 300 10, save 60 10000
     struct saveparam *saveparams;   /* Save points array for RDB */
@@ -1257,8 +1257,11 @@ struct redisServer {
     size_t zset_max_ziplist_entries;
     size_t zset_max_ziplist_value;
     size_t hll_sparse_max_bytes;
+    // 保存了秒级精度的系统当前Unix时间戳
     time_t unixtime;        /* Unix time sampled every cron cycle. */
+    // 保存了毫秒级精度的系统当前Unix时间戳
     long long mstime;       /* Like 'unixtime' but with milliseconds resolution. */
+    // 由于这两个字段的精度不高，所以用处也有限
 
 
     /* Pubsub */
